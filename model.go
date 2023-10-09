@@ -67,7 +67,7 @@ func ModelFromDisk(path string) *Model {
 		Name: filepath.Base(path),
 
 		extracter: loadClassifier(filesys),
-		tagger:    newPerceptronTagger(),
+		tagger:    newPerceptronTaggerFromDisk(path),
 	}
 }
 
