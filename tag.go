@@ -22,6 +22,7 @@ package prose
 
 import (
 	"math"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -268,13 +269,19 @@ func newPerceptronTaggerFromDisk(basePath string) *perceptronTagger {
 	var classes []string
 
 	modelBasePath := filepath.Join(basePath, "AveragedPerceptron")
-	dec := getAsset(modelBasePath, "classes.gob")
+	modelBaseFs := os.DirFS(modelBasePath)
+	modelClasses, err := modelBaseFs.Open("classes.gob")
+	checkError(err)
+	modelTags, err := modelBaseFs.Open("tags.gob")
+	checkError(err)
+	modelWeights, err := modelBaseFs.Open("weights.gob")
+	checkError(err)
+
+	dec := getDiskAsset(modelClasses)
 	checkError(dec.Decode(&classes))
-
-	dec = getAsset(modelBasePath, "tags.gob")
+	dec = getDiskAsset(modelTags)
 	checkError(dec.Decode(&tags))
-
-	dec = getAsset(modelBasePath, "weights.gob")
+	dec = getDiskAsset(modelWeights)
 	checkError(dec.Decode(&wts))
 
 	return &perceptronTagger{model: newAveragedPerceptron(wts, tags, classes)}
